@@ -1,1 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Game Copier</title>
+</head>
+<body>
+  <h2>Wklej coś do tabeli:</h2>
+  <table border="1">
+    <tr>
+      <th>Wpis</th>
+    </tr>
+    <tr>
+      <td contenteditable="true" id="tableCell">Tu wklej tekst</td>
+    </tr>
+  </table>
+  <br>
+  <button onclick="sendMessage()">Release</button>
 
+  <script>
+    async function sendMessage() {
+      const msg = document.getElementById('tableCell').innerText;
+
+      if (!msg) {
+        alert('Wpisz coś!');
+        return;
+      }
+
+      // Wysyłamy do backendu – webhook jest ukryty po stronie backendu
+      const res = await fetch('/api/sendWebhook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await res.json();
+      alert(data.message);
+    }
+  </script>
+</body>
+</html>
