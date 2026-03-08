@@ -1,13 +1,18 @@
 // pages/api/sendWebhook.js
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ message: 'Only POST allowed' });
+  // akceptujemy tylko POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Only POST allowed' });
+  }
 
   const { message } = req.body;
 
-  if (!message) return res.status(400).json({ message: 'No message provided' });
+  if (!message) {
+    return res.status(400).json({ message: 'No message provided' });
+  }
 
   try {
-    // Wysyłamy do webhooka, który jest ukryty w zmiennej środowiskowej
+    // webhook jest ukryty w zmiennej środowiskowej Vercel
     await fetch(process.env.WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
