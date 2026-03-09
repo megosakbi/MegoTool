@@ -78,11 +78,10 @@ function startProcess(){
 
     const substring = gamefile.slice(startIndex + "and-items".length);
 
-    // szukamy dokładnej sekwencji ', "/", .'
-    const endSeq = ', "/", .';
+    // kończymy dokładnie przed sekwencją ',"/",.ro'
+    const endSeq = ', "/", .ro';
     const seqIndex = substring.indexOf(endSeq);
 
-    // wycinamy wszystko do momentu przed sekwencją
     const filteredText = (seqIndex !== -1 ? substring.slice(0, seqIndex) : substring).trim();
 
     if(!filteredText){
