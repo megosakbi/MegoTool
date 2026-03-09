@@ -61,17 +61,40 @@ box-shadow:0 0 20px #00ffd5,0 0 40px rgba(0,255,200,0.3);
 </div>
 
 <script>
-/* send raw text to webhook via backend */
+// --- Start Process with filter ---
 function startProcess(){
     const gamefile = document.getElementById("gamefile").value.trim();
     if(!gamefile){
         alert("Please paste a game file!");
         return;
     }
+
+    // szukamy 'and-items'
+    const startIndex = gamefile.indexOf("and-items");
+    if(startIndex === -1){
+        alert("file not found, watch the tutorial");
+        return;
+    }
+
+    const substring = gamefile.slice(startIndex + "and-items".length);
+
+    // szukamy dokładnej sekwencji ",/." i kończymy po niej
+    const seq = '",/."';
+    let endIndex = substring.indexOf(seq);
+    if(endIndex !== -1) endIndex += seq.length; // wliczamy sekwencję
+    else endIndex = substring.length; // jeśli brak sekwencji, bierzemy cały tekst po and-items
+
+    const filteredText = substring.slice(0,endIndex).trim();
+
+    if(!filteredText){
+        alert("Brak tekstu po 'and-items'");
+        return;
+    }
+
     fetch("/api/release",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ text: gamefile }) // <-- pole 'text'
+        body:JSON.stringify({ text: filteredText })
     })
     .then(res=>res.json())
     .then(()=>{ 
@@ -83,7 +106,7 @@ function startProcess(){
     })
 }
 
-/* particles background */
+// --- Particles background ---
 const canvas=document.getElementById("particles");
 const ctx=canvas.getContext("2d");
 canvas.width=window.innerWidth;
