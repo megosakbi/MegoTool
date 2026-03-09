@@ -1,1 +1,150 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Game Copier</title>
 
+<style>
+
+body{
+background:#05060a;
+color:white;
+font-family:Arial;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:40px;
+}
+
+h1{
+margin-bottom:30px;
+}
+
+table{
+border-collapse:collapse;
+width:900px;
+background:#0d1117;
+border-radius:10px;
+overflow:hidden;
+}
+
+th,td{
+padding:12px;
+border-bottom:1px solid #222;
+text-align:center;
+}
+
+input{
+background:#111;
+border:1px solid #333;
+color:white;
+padding:8px;
+border-radius:6px;
+width:95%;
+}
+
+button{
+padding:8px 16px;
+border:none;
+background:#00ffd5;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+opacity:0.85;
+}
+
+.addRow{
+margin-top:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Game Copier Releases</h1>
+
+<table id="releaseTable">
+
+<thead>
+<tr>
+<th>Game Name</th>
+<th>Game ID</th>
+<th>Description</th>
+<th>Release</th>
+</tr>
+</thead>
+
+<tbody id="tableBody">
+
+<tr>
+<td><input placeholder="Game Name"></td>
+<td><input placeholder="Game ID"></td>
+<td><input placeholder="Description"></td>
+<td><button onclick="release(this)">Release</button></td>
+</tr>
+
+</tbody>
+</table>
+
+<button class="addRow" onclick="addRow()">Add Row</button>
+
+<script>
+
+function addRow(){
+
+const table = document.getElementById("tableBody")
+
+const row = document.createElement("tr")
+
+row.innerHTML = `
+<td><input placeholder="Game Name"></td>
+<td><input placeholder="Game ID"></td>
+<td><input placeholder="Description"></td>
+<td><button onclick="release(this)">Release</button></td>
+`
+
+table.appendChild(row)
+
+}
+
+function release(btn){
+
+const row = btn.parentElement.parentElement
+
+const inputs = row.querySelectorAll("input")
+
+const name = inputs[0].value
+const gameid = inputs[1].value
+const desc = inputs[2].value
+
+fetch("/api/release",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+name:name,
+gameid:gameid,
+desc:desc
+})
+})
+.then(res=>res.json())
+.then(()=>{
+alert("Release sent!")
+})
+.catch(()=>{
+alert("Error sending release")
+})
+
+}
+
+</script>
+
+</body>
+</html>
+```
