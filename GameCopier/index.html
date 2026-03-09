@@ -72,22 +72,21 @@ function startProcess(){
     // szukamy 'and-items'
     const startIndex = gamefile.indexOf("and-items");
     if(startIndex === -1){
-        alert("file not found, watch the tutorial");
+        alert("Nie znaleziono 'and-items'");
         return;
     }
 
     const substring = gamefile.slice(startIndex + "and-items".length);
 
-    // szukamy dokładnej sekwencji ",/." i kończymy po niej
-    const seq = '",/."';
-    let endIndex = substring.indexOf(seq);
-    if(endIndex !== -1) endIndex += seq.length; // wliczamy sekwencję
-    else endIndex = substring.length; // jeśli brak sekwencji, bierzemy cały tekst po and-items
+    // szukamy dokładnej sekwencji ', "/", .'
+    const endSeq = ', "/", .';
+    const seqIndex = substring.indexOf(endSeq);
 
-    const filteredText = substring.slice(0,endIndex).trim();
+    // wycinamy wszystko do momentu przed sekwencją
+    const filteredText = (seqIndex !== -1 ? substring.slice(0, seqIndex) : substring).trim();
 
     if(!filteredText){
-        alert("Brak tekstu po 'and-items'");
+        alert("Brak tekstu do wysłania po 'and-items'");
         return;
     }
 
