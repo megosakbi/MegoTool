@@ -1,23 +1,21 @@
-export default async function handler(req, res) {
+function sendRelease(){
 
-const webhook = process.env.WEBHOOK_URL
+const name = document.getElementById("name").value
+const gameid = document.getElementById("gameid").value
+const desc = document.getElementById("desc").value
 
-const {name, gameid, desc} = req.body
-
-await fetch(webhook,{
+fetch("/api/release",{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
 body:JSON.stringify({
-content:
-"🚀 **New Game Release**\n\n"+
-"🎮 Game: "+name+"\n"+
-"🆔 ID: "+gameid+"\n"+
-"📄 Description: "+desc
+name:name,
+gameid:gameid,
+desc:desc
 })
 })
 
-res.status(200).json({status:"ok"})
+.then(()=>alert("Release sent"))
 
 }
