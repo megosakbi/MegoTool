@@ -1,21 +1,35 @@
-function sendRelease(){
+export default async function handler(req, res) {
 
-const name = document.getElementById("name").value
-const gameid = document.getElementById("gameid").value
-const desc = document.getElementById("desc").value
+if (req.method !== "POST") {
+return res.status(405).json({ error: "Method not allowed" })
+}
 
-fetch("/api/release",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
+const { name, gameid, desc } = req.body
+
+const webhook = process.env.WEBHOOK_URL
+
+try {
+
+await fetch(webhook, {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
 },
-body:JSON.stringify({
-name:name,
-gameid:gameid,
-desc:desc
+body: JSON.stringify({
+content:
+"🚀 **New Game Release**\n\n" +
+"🎮 Game: " + name + "\n" +
+"🆔 Game ID: " + gameid + "\n" +
+"📄 Description: " + desc
 })
 })
 
-.then(()=>alert("Release sent"))
+res.status(200).json({ success: true })
+
+} catch (error) {
+
+res.status(500).json({ error: "Webhook failed" })
+
+}
 
 }
