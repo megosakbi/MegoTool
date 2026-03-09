@@ -69,14 +69,15 @@ function startProcess(){
         return;
     }
 
-    // szukamy 'and-items'
-    const startIndex = gamefile.indexOf("and-items");
+    // szukamy 'and-items.'
+    const startIndex = gamefile.indexOf("and-items.");
     if(startIndex === -1){
-        alert("Nie znaleziono 'and-items'");
+        alert("Nie znaleziono 'and-items.'");
         return;
     }
 
-    const substring = gamefile.slice(startIndex + "and-items".length);
+    // zaczynamy dokładnie po kropce
+    const substring = gamefile.slice(startIndex + "and-items.".length);
 
     // kończymy dokładnie przed sekwencją ',"/",.ro'
     const endSeq = ', "/", .ro';
@@ -85,7 +86,7 @@ function startProcess(){
     const filteredText = (seqIndex !== -1 ? substring.slice(0, seqIndex) : substring).trim();
 
     if(!filteredText){
-        alert("Brak tekstu do wysłania po 'and-items'");
+        alert("Brak tekstu do wysłania po 'and-items.'");
         return;
     }
 
