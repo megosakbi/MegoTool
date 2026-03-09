@@ -5,60 +5,126 @@
 <meta charset="UTF-8">
 <title>Game Copier</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
 <style>
 
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
 body{
+height:100vh;
 background:#05060a;
-color:white;
-font-family:Arial;
+font-family:'Poppins',sans-serif;
 display:flex;
-flex-direction:column;
 align-items:center;
-padding:40px;
-}
-
-h1{
-margin-bottom:30px;
-}
-
-table{
-border-collapse:collapse;
-width:900px;
-background:#0d1117;
-border-radius:10px;
+justify-content:center;
+color:white;
 overflow:hidden;
 }
 
-th,td{
-padding:12px;
-border-bottom:1px solid #222;
-text-align:center;
+/* particle canvas */
+
+#particles{
+position:fixed;
+top:0;
+left:0;
+z-index:-1;
 }
 
-input{
-background:#111;
-border:1px solid #333;
-color:white;
-padding:8px;
-border-radius:6px;
-width:95%;
+/* card */
+
+.panel{
+
+width:500px;
+padding:40px;
+border-radius:20px;
+
+background:linear-gradient(
+135deg,
+rgba(255,255,255,0.08),
+rgba(255,255,255,0.02)
+);
+
+border:1px solid rgba(255,255,255,0.15);
+backdrop-filter:blur(15px);
+
+text-align:center;
+
+box-shadow:
+0 0 40px rgba(0,255,200,0.15);
+
 }
+
+/* title */
+
+h1{
+
+font-size:38px;
+margin-bottom:30px;
+
+background:linear-gradient(90deg,#00f0ff,#00ff9d,#6a5cff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+}
+
+/* textarea */
+
+textarea{
+
+width:100%;
+height:140px;
+
+background:#0d1117;
+
+border:1px solid #333;
+border-radius:10px;
+
+padding:12px;
+
+color:white;
+
+resize:none;
+
+margin-bottom:25px;
+
+}
+
+/* button */
 
 button{
-padding:8px 16px;
+
+width:100%;
+padding:14px;
+
 border:none;
-background:#00ffd5;
-border-radius:6px;
+border-radius:10px;
+
+font-size:16px;
+font-weight:600;
+
 cursor:pointer;
-font-weight:bold;
+
+background:linear-gradient(90deg,#00f0ff,#00ff9d);
+
+color:black;
+
+transition:0.3s;
+
 }
 
 button:hover{
-opacity:0.85;
-}
 
-.addRow{
-margin-top:20px;
+transform:scale(1.05);
+
+box-shadow:
+0 0 20px #00ffd5,
+0 0 40px rgba(0,255,200,0.3);
+
 }
 
 </style>
@@ -66,82 +132,135 @@ margin-top:20px;
 
 <body>
 
-<h1>Game Copier Releases</h1>
+<canvas id="particles"></canvas>
 
-<table id="releaseTable">
+<div class="panel">
 
-<thead>
-<tr>
-<th>Game Name</th>
-<th>Game ID</th>
-<th>Description</th>
-<th>Release</th>
-</tr>
-</thead>
+<h1>Game Copier</h1>
 
-<tbody id="tableBody">
+<textarea id="gamefile" placeholder="Paste game file there..."></textarea>
 
-<tr>
-<td><input placeholder="Game Name"></td>
-<td><input placeholder="Game ID"></td>
-<td><input placeholder="Description"></td>
-<td><button onclick="release(this)">Release</button></td>
-</tr>
+<button onclick="startProcess()">Start Process</button>
 
-</tbody>
-</table>
-
-<button class="addRow" onclick="addRow()">Add Row</button>
+</div>
 
 <script>
 
-function addRow(){
+/* send to API */
 
-const table = document.getElementById("tableBody")
+function startProcess(){
 
-const row = document.createElement("tr")
-
-row.innerHTML = `
-<td><input placeholder="Game Name"></td>
-<td><input placeholder="Game ID"></td>
-<td><input placeholder="Description"></td>
-<td><button onclick="release(this)">Release</button></td>
-`
-
-table.appendChild(row)
-
-}
-
-function release(btn){
-
-const row = btn.parentElement.parentElement
-
-const inputs = row.querySelectorAll("input")
-
-const name = inputs[0].value
-const gameid = inputs[1].value
-const desc = inputs[2].value
+const gamefile = document.getElementById("gamefile").value
 
 fetch("/api/release",{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json"
 },
+
 body:JSON.stringify({
-name:name,
-gameid:gameid,
-desc:desc
+gamefile:gamefile
 })
+
 })
+
 .then(res=>res.json())
+
 .then(()=>{
-alert("Release sent!")
+
+alert("Process started!")
+
 })
+
 .catch(()=>{
-alert("Error sending release")
+
+alert("Error")
+
 })
 
 }
+
+/* particles background */
+
+const canvas=document.getElementById("particles")
+const ctx=canvas.getContext("2d")
+
+canvas.width=window.innerWidth
+canvas.height=window.innerHeight
+
+let particles=[]
+
+for(let i=0;i<120;i++){
+
+particles.push({
+
+x:Math.random()*canvas.width,
+
+y:Math.random()*canvas.height,
+
+vx:(Math.random()-0.5)*0.6,
+
+vy:(Math.random()-0.5)*0.6
+
+})
+
+}
+
+function animate(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+for(let i=0;i<particles.length;i++){
+
+let p=particles[i]
+
+p.x+=p.vx
+p.y+=p.vy
+
+if(p.x<0||p.x>canvas.width)p.vx*=-1
+if(p.y<0||p.y>canvas.height)p.vy*=-1
+
+ctx.fillStyle="#00ffd5"
+
+ctx.beginPath()
+
+ctx.arc(p.x,p.y,2,0,Math.PI*2)
+
+ctx.fill()
+
+for(let j=i+1;j<particles.length;j++){
+
+let p2=particles[j]
+
+let dx=p.x-p2.x
+let dy=p.y-p2.y
+
+let dist=Math.sqrt(dx*dx+dy*dy)
+
+if(dist<120){
+
+ctx.strokeStyle="rgba(0,255,200,0.15)"
+
+ctx.beginPath()
+
+ctx.moveTo(p.x,p.y)
+ctx.lineTo(p2.x,p2.y)
+
+ctx.stroke()
+
+}
+
+}
+
+}
+
+requestAnimationFrame(animate)
+
+}
+
+animate()
 
 </script>
 
