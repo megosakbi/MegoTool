@@ -18,7 +18,9 @@ overflow:hidden;
 }
 #particles{position:fixed;top:0;left:0;z-index:-1;}
 .panel{
-width:400px;padding:30px;border-radius:15px;
+width:400px;
+padding:30px;
+border-radius:15px;
 background:linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
 border:1px solid rgba(255,255,255,0.15);
 backdrop-filter:blur(15px);
@@ -59,6 +61,7 @@ box-shadow:0 0 20px #00ffd5,0 0 40px rgba(0,255,200,0.3);
 </div>
 
 <script>
+/* send raw text to webhook via backend */
 function startProcess(){
     const gamefile = document.getElementById("gamefile").value.trim();
     if(!gamefile){
@@ -68,7 +71,7 @@ function startProcess(){
     fetch("/api/release",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ text: gamefile }) // <-- wysyłamy pole 'text'
+        body:JSON.stringify({ text: gamefile }) // <-- pole 'text'
     })
     .then(res=>res.json())
     .then(()=>{ 
@@ -116,5 +119,6 @@ function animate(){
 }
 animate();
 </script>
+
 </body>
 </html>
