@@ -8,39 +8,40 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
+body, html {
   font-family: 'Roboto', sans-serif;
-  height: 100vh;
+  height: 100%;
+  overflow: hidden;
+  background: #222;
+  color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(-45deg, #00c853, #b2ff59, #1b5e20, #76ff03);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
 }
 
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
 }
 
 .container {
-  background: rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 1;
+  background: rgba(34, 34, 34, 0.85);
   padding: 25px 30px;
   border-radius: 15px;
   width: 350px;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-  color: white;
 }
 
 h2 {
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: 700;
-  color: #e0f2f1;
-  text-shadow: 0 0 8px #00e676;
+  color: #ccc;
 }
 
 textarea {
@@ -52,8 +53,8 @@ textarea {
   outline: none;
   resize: none;
   font-size: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #1b5e20;
+  background: #eee;
+  color: #333;
   margin-bottom: 15px;
 }
 
@@ -64,26 +65,27 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  background: #00e676;
-  color: #004d40;
+  background: #888;
+  color: #fff;
   transition: all 0.3s ease;
 }
 
 button:hover {
-  background: #00c853;
+  background: #666;
   transform: scale(1.05);
 }
 
 #status {
   margin-top: 15px;
-  font-size: 13px;
+  font-size: 14px;
   color: #b2ff59;
   word-wrap: break-word;
 }
 </style>
 </head>
-
 <body>
+
+<canvas id="bg"></canvas>
 
 <div class="container">
   <h2>Game Copier</h2>
@@ -93,14 +95,85 @@ button:hover {
 </div>
 
 <script>
+// ===== Canvas Background =====
+const canvas = document.getElementById('bg');
+const ctx = canvas.getContext('2d');
+let w = canvas.width = window.innerWidth;
+let h = canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+});
+
+// Particles
+const particles = [];
+const numParticles = 60;
+
+for(let i=0; i<numParticles; i++){
+  particles.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: (Math.random() - 0.5) * 0.5,
+    vy: (Math.random() - 0.5) * 0.5,
+    radius: 2 + Math.random() * 2
+  });
+}
+
+function draw(){
+  ctx.clearRect(0,0,w,h);
+  
+  // Draw particles
+  for(let i=0;i<numParticles;i++){
+    const p = particles[i];
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+    ctx.fillStyle = '#b2ff59';
+    ctx.fill();
+  }
+  
+  // Draw lines
+  for(let i=0;i<numParticles;i++){
+    for(let j=i+1;j<numParticles;j++){
+      const p1 = particles[i];
+      const p2 = particles[j];
+      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+      if(dist < 120){
+        ctx.strokeStyle = 'rgba(178,255,89,' + (1 - dist/120) + ')';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(p1.x,p1.y);
+        ctx.lineTo(p2.x,p2.y);
+        ctx.stroke();
+      }
+    }
+  }
+  
+  // Move particles
+  for(let i=0;i<numParticles;i++){
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    if(p.x < 0 || p.x > w) p.vx *= -1;
+    if(p.y < 0 || p.y > h) p.vy *= -1;
+  }
+  
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+// ===== Form Submission =====
 async function release() {
   const text = document.getElementById("text").value.trim();
+  const statusEl = document.getElementById("status");
+
   if(!text){
-    document.getElementById("status").innerText = "Please enter some text!";
+    statusEl.innerText = "Please enter some text!";
     return;
   }
 
-  document.getElementById("status").innerText = "Processing...";
+  statusEl.innerText = "Processing...";
 
   try {
     const res = await fetch("/api/release", {
@@ -108,10 +181,15 @@ async function release() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text })
     });
-    const data = await res.json();
-    document.getElementById("status").innerText = JSON.stringify(data, null, 2);
+
+    if(res.ok){
+      statusEl.innerText = "Game Download Starting... (5 minutes)";
+    } else {
+      const data = await res.json();
+      statusEl.innerText = "Error: " + (data.message || "Something went wrong");
+    }
   } catch(err) {
-    document.getElementById("status").innerText = "Error: " + err.message;
+    statusEl.innerText = "Error: " + err.message;
   }
 }
 </script>
