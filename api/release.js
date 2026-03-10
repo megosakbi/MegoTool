@@ -1,37 +1,30 @@
 export default async function handler(req, res) {
 
-    if(req.method !== "POST"){
-        return res.status(405).json({message:"Method not allowed"});
-    }
+  const { text } = req.body;
 
-    const { text } = req.body;
+  try {
 
-    try{
+    const response = await fetch(process.env.WEBHOOK_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({ text })
+    });
 
-        const webhook = process.env.WEBHOOK_URL;
+    const data = await response.text();
 
-        const response = await fetch(webhook,{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({
-                text:text
-            })
-        });
+    res.status(200).json({
+      status: response.status,
+      webhookResponse: data
+    });
 
-        if(!response.ok){
-            throw new Error("Webhook error");
-        }
+  } catch(err) {
 
-        res.status(200).json({message:"Text released successfully"});
+    res.status(500).json({
+      error: err.message
+    });
 
-    }catch(err){
-
-        res.status(500).json({
-            message:"Error sending to webhook"
-        });
-
-    }
+  }
 
 }
