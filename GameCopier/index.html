@@ -16,6 +16,7 @@ body, html {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 canvas {
@@ -23,6 +24,15 @@ canvas {
   top: 0;
   left: 0;
   z-index: 0;
+}
+
+h1 {
+  z-index: 1;
+  color: #555;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 .main-wrapper {
@@ -35,38 +45,45 @@ canvas {
 
 .container {
   background: rgba(255, 255, 255, 0.95);
-  padding: 25px 30px;
+  padding: 20px 25px;
   border-radius: 15px;
-  width: 560px;
-  height: 315px;
+  width: 400px;
+  height: auto;
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  border: 4px solid #fff;       /* Biała ramka */
+  border: 4px solid #fff;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
+.container p.instructions {
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
 .container textarea {
-  width: 90%;
-  height: 120px;
-  margin-bottom: 20px;
-  padding: 10px;
-  border-radius: 10px;
+  width: 85%;
+  height: 80px;
+  margin-bottom: 15px;
+  padding: 8px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   outline: none;
   resize: none;
-  font-size: 14px;
+  font-size: 13px;
   background: #f7f7f7;
   color: #333;
   font-family: monospace;
 }
 
 .container button {
-  padding: 10px 25px;
+  padding: 8px 20px;
   border: none;
-  border-radius: 10px;
-  font-size: 16px;
+  border-radius: 8px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
   background: #bbb;
@@ -79,16 +96,9 @@ canvas {
   transform: scale(1.05);
 }
 
-.container h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #555;
-  margin-bottom: 15px;
-}
-
 #status {
-  margin-top: 10px;
-  font-size: 14px;
+  margin-top: 8px;
+  font-size: 13px;
   color: #555;
   word-wrap: break-word;
   min-height: 20px;
@@ -109,9 +119,14 @@ canvas {
 
 <canvas id="bg"></canvas>
 
+<h1>Game Copier</h1> <!-- Nagłówek nad obiema sekcjami -->
+
 <div class="main-wrapper">
   <div class="container">
-    <h2>Game Copier</h2>
+    <p class="instructions">
+      Paste your Game file in the box below, then click "Start Process".<br>
+      If you don't know how to get Game file, watch "How to use".
+    </p>
     <textarea id="text" placeholder="Paste your text here..."></textarea>
     <button onclick="release()">Start process</button>
     <p id="status"></p>
