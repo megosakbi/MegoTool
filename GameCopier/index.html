@@ -2,61 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Robux Spawner - Gray Theme</title>
+<title>Robux Spawner - Layout Corrected</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
   body {
     margin: 0;
     font-family: 'Roboto', sans-serif;
-    background: #121212; /* ciemnoszare tło */
+    background: #121212;
     color: #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
     min-height: 100vh;
     padding: 40px 20px;
-  }
-
-  .container {
-    background: #222;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-    padding: 25px 30px;
-    max-width: 560px;
-    width: 100%;
-    margin-right: 40px;
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
 
   h1 {
     font-weight: 700;
-    font-size: 2.8rem;
+    font-size: 3rem;
     color: #bbb;
-    text-align: center;
-    margin-bottom: 40px;
     text-shadow: 0 0 10px #555;
+    margin-bottom: 40px;
+    text-align: center;
     width: 100%;
+    max-width: 1200px;
   }
 
-  h2 {
-    font-weight: 700;
-    font-size: 1.3rem;
+  .content {
+    display: flex;
+    gap: 40px;
+    max-width: 1200px;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .left-panel, .right-panel {
+    background: #222;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    padding: 25px 30px;
     color: #ddd;
+  }
+
+  .left-panel {
+    flex: 1;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .left-panel h2 {
+    font-weight: 700;
+    font-size: 1.5rem;
     margin-bottom: 15px;
   }
 
-  p {
-    color: #999;
+  .left-panel p {
     font-size: 0.9rem;
+    color: #999;
+    margin-bottom: 20px;
     line-height: 1.4;
-    margin-bottom: 25px;
   }
 
   textarea {
     width: 100%;
-    height: 100px;
+    height: 140px;
     background: #333;
     border: 1.5px solid #555;
     border-radius: 10px;
@@ -67,6 +79,7 @@
     resize: vertical;
     transition: border-color 0.3s ease;
   }
+
   textarea:focus {
     outline: none;
     border-color: #888;
@@ -85,24 +98,24 @@
     cursor: pointer;
     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     transition: background-color 0.3s ease, transform 0.2s ease;
+    align-self: flex-start;
   }
+
   button:hover {
     background: #777;
     transform: scale(1.05);
   }
 
   .right-panel {
+    flex: 1;
     max-width: 600px;
-    width: 100%;
-    background: #222;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-    padding: 20px;
   }
 
   .right-panel h2 {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
     color: #ddd;
-    margin-bottom: 12px;
   }
 
   iframe {
@@ -115,13 +128,17 @@
   }
 
   @media (max-width: 900px) {
-    body {
+    .content {
       flex-direction: column;
       align-items: center;
     }
-    .container, .right-panel {
+    .left-panel, .right-panel {
       max-width: 90%;
-      margin: 0 0 30px 0;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    button {
+      align-self: center;
     }
   }
 </style>
@@ -130,9 +147,8 @@
 
   <h1>Robux Spawner</h1>
 
-  <div style="display:flex; gap:40px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1200px;">
-
-    <section class="container" aria-label="Robux Spawner Input">
+  <div class="content">
+    <section class="left-panel" aria-label="Robux Spawner Input">
       <h2>Robux Spawner</h2>
       <p>Paste your Robux Spawner file in the box below, then click "Process!"<br>If you don't know how to get Robux Spawner file, watch "How to use"</p>
       <textarea placeholder="Paste Robux Spawner file here..."></textarea>
@@ -143,7 +159,6 @@
       <h2>How to use</h2>
       <iframe src="https://www.youtube.com/embed/k9SfgtkEmpo" title="Robux Spawner tutorial video" allowfullscreen></iframe>
     </section>
-
   </div>
 
 </body>
