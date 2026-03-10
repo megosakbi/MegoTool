@@ -1,25 +1,39 @@
 export default async function handler(req, res) {
 
-  const { text } = req.body;
+  if(req.method !== "POST"){
+    return res.status(405).json({error:"Only POST allowed"});
+  }
 
-  try {
+  try{
 
-    const response = await fetch(process.env.WEBHOOK_URL,{
+    const { text } = req.body;
+
+    const webhook = process.env.WEBHOOK_URL;
+
+    if(!webhook){
+      return res.status(500).json({
+        error:"WEBHOOK_URL is not set"
+      });
+    }
+
+    const response = await fetch(webhook,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
       },
-      body:JSON.stringify({ text })
+      body:JSON.stringify({
+        text:text
+      })
     });
 
-    const data = await response.text();
+    const result = await response.text();
 
     res.status(200).json({
-      status: response.status,
-      webhookResponse: data
+      success:true,
+      webhookResponse: result
     });
 
-  } catch(err) {
+  }catch(err){
 
     res.status(500).json({
       error: err.message
