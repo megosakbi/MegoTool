@@ -12,8 +12,8 @@ body, html {
   font-family: 'Roboto', sans-serif;
   height: 100%;
   overflow: hidden;
-  background: #222;
-  color: #fff;
+  background: #e0e0e0; /* jasnoszare tło */
+  color: #333;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -29,19 +29,19 @@ canvas {
 .container {
   position: relative;
   z-index: 1;
-  background: rgba(34, 34, 34, 0.85);
+  background: rgba(255, 255, 255, 0.85); /* jasny kontener */
   padding: 25px 30px;
   border-radius: 15px;
   width: 350px;
   text-align: center;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* delikatny cień */
 }
 
 h2 {
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: 700;
-  color: #ccc;
+  color: #555;
 }
 
 textarea {
@@ -49,11 +49,11 @@ textarea {
   height: 80px;
   padding: 10px;
   border-radius: 10px;
-  border: none;
+  border: 1px solid #ccc;
   outline: none;
   resize: none;
   font-size: 14px;
-  background: #eee;
+  background: #f7f7f7;
   color: #333;
   margin-bottom: 15px;
 }
@@ -65,20 +65,20 @@ button {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  background: #888;
-  color: #fff;
+  background: #bbb;
+  color: #333;
   transition: all 0.3s ease;
 }
 
 button:hover {
-  background: #666;
+  background: #999;
   transform: scale(1.05);
 }
 
 #status {
   margin-top: 15px;
   font-size: 14px;
-  color: #b2ff59;
+  color: #555;
   word-wrap: break-word;
 }
 </style>
@@ -114,9 +114,9 @@ for(let i=0; i<numParticles; i++){
   particles.push({
     x: Math.random() * w,
     y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 0.5,
-    vy: (Math.random() - 0.5) * 0.5,
-    radius: 2 + Math.random() * 2
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    radius: 1 + Math.random() * 2
   });
 }
 
@@ -128,7 +128,7 @@ function draw(){
     const p = particles[i];
     ctx.beginPath();
     ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-    ctx.fillStyle = '#b2ff59';
+    ctx.fillStyle = 'rgba(100,100,100,0.7)';
     ctx.fill();
   }
   
@@ -139,7 +139,7 @@ function draw(){
       const p2 = particles[j];
       const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
       if(dist < 120){
-        ctx.strokeStyle = 'rgba(178,255,89,' + (1 - dist/120) + ')';
+        ctx.strokeStyle = 'rgba(150,150,150,' + (1 - dist/120) + ')';
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(p1.x,p1.y);
