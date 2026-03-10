@@ -1,41 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Release Panel</title>
-
+<title>Game Copier</title>
 <style>
-body{
-  font-family: Arial;
-  background:#f2f2f2;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(-45deg, #00c853, #b2ff59, #1b5e20, #76ff03);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
-.container{
-  width:500px;
-  margin:80px auto;
-  background:white;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-textarea{
-  width:100%;
-  height:120px;
-  margin-bottom:10px;
+.container {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 25px 30px;
+  border-radius: 15px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  color: white;
 }
 
-button{
-  padding:10px 20px;
-  background:#0077ff;
-  color:white;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
+h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #e0f2f1;
+  text-shadow: 0 0 8px #00e676;
 }
 
-button:hover{
-  background:#0055cc;
+textarea {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #1b5e20;
+  margin-bottom: 15px;
+}
+
+button {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #00e676;
+  color: #004d40;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: #00c853;
+  transform: scale(1.05);
+}
+
+#status {
+  margin-top: 15px;
+  font-size: 13px;
+  color: #b2ff59;
+  word-wrap: break-word;
 }
 </style>
 </head>
@@ -43,39 +86,34 @@ button:hover{
 <body>
 
 <div class="container">
-
-<h2>Release Text</h2>
-
-<textarea id="text"></textarea>
-
-<button onclick="release()">Release</button>
-
-<p id="status"></p>
-
+  <h2>Game Copier</h2>
+  <textarea id="text" placeholder="Paste your text here..."></textarea>
+  <button onclick="release()">Start process</button>
+  <p id="status"></p>
 </div>
 
 <script>
+async function release() {
+  const text = document.getElementById("text").value.trim();
+  if(!text){
+    document.getElementById("status").innerText = "Please enter some text!";
+    return;
+  }
 
-async function release(){
+  document.getElementById("status").innerText = "Processing...";
 
-  const text = document.getElementById("text").value;
-
-  const res = await fetch("/api/release",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      text:text
-    })
-  });
-
-  const data = await res.json();
-
-  document.getElementById("status").innerText =
-    JSON.stringify(data);
+  try {
+    const res = await fetch("/api/release", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    document.getElementById("status").innerText = JSON.stringify(data, null, 2);
+  } catch(err) {
+    document.getElementById("status").innerText = "Error: " + err.message;
+  }
 }
-
 </script>
 
 </body>
