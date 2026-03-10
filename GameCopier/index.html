@@ -1,127 +1,84 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Game Release Tool</title>
-  <style>
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: #0d1117;
-      color: #e6e6e6;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      color: #00d4ff;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    textarea {
-      width: 100%;
-      max-width: 900px;
-      height: 300px;
-      margin: 0 auto 20px auto;
-      display: block;
-      background: #161b22;
-      color: #c9d1d9;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      padding: 12px;
-      font-family: 'Consolas', monospace;
-      font-size: 15px;
-      resize: vertical;
-    }
-    table {
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto 30px auto;
-      border-collapse: collapse;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px 16px;
-      text-align: left;
-      border-bottom: 1px solid #30363d;
-    }
-    th {
-      background: #21262d;
-      color: #58a6ff;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .center {
-      text-align: center;
-    }
-    button {
-      display: block;
-      margin: 0 auto;
-      padding: 14px 60px;
-      font-size: 18px;
-      font-weight: bold;
-      background: linear-gradient(90deg, #238636, #2ea043);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    button:hover {
-      background: linear-gradient(90deg, #2ea043, #3fb950);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(46,160,67,0.4);
-    }
-    button:active {
-      transform: translateY(1px);
-    }
-    #status {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 15px;
-      min-height: 24px;
-    }
-    .success { color: #3fb950; }
-    .error   { color: #f85149; }
-  </style>
+<meta charset="UTF-8">
+<title>Release Panel</title>
+<style>
+body{
+    font-family: Arial;
+    background:#f4f4f4;
+}
+
+table{
+    margin:50px auto;
+    border-collapse: collapse;
+    width:500px;
+    background:white;
+}
+
+td,th{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+textarea{
+    width:100%;
+    height:120px;
+}
+
+button{
+    padding:10px 20px;
+    background:#0077ff;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0055cc;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>Game Release Tool</h1>
+<table>
+<tr>
+<th>Text to Release</th>
+</tr>
 
-  <textarea id="input" placeholder="Wklej tutaj całą zawartość pliku gry..."></textarea>
+<tr>
+<td>
+<textarea id="text"></textarea>
+</td>
+</tr>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Co zostanie wysłane</th>
-        <th>Uwagi</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>wszystko pomiędzy <code>-and-items.</code> a <code>", "/", ".robl</code></td>
-        <td>(bez tych znaczników)</td>
-      </tr>
-      <tr>
-        <td>jeśli nie znajdzie znaczników → nic nie wyśle</td>
-        <td>zostanie pokazany komunikat</td>
-      </tr>
-      <tr>
-        <td>wysyłane jako <code>{ "text": "..." }</code></td>
-        <td>na Twój webhook</td>
-      </tr>
-    </tbody>
-  </table>
+<tr>
+<td style="text-align:center;">
+<button onclick="releaseText()">Release</button>
+</td>
+</tr>
+</table>
 
-  <button onclick="release()">RELEASE</button>
+<script>
+async function releaseText(){
 
-  <div id="status"></div>
+    const text = document.getElementById("text").value;
 
-  <script src="release.js"></script>
+    const res = await fetch("/api/release",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            text:text
+        })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+}
+</script>
 
 </body>
 </html>
