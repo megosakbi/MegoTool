@@ -40,7 +40,10 @@ position:relative;
 z-index:1;
 display:flex;
 gap:40px;
+align-items:flex-start;
 }
+
+/* GUI */
 
 .container{
 background:rgba(255,255,255,0.95);
@@ -55,8 +58,6 @@ flex-direction:column;
 justify-content:center;
 align-items:center;
 }
-
-/* instructions */
 
 .instructions{
 font-size:14px;
@@ -78,7 +79,7 @@ font-family:monospace;
 background:#f7f7f7;
 }
 
-/* button */
+/* BUTTON */
 
 .start-btn{
 padding:14px 45px;
@@ -106,6 +107,8 @@ box-shadow:
 transform:scale(.96);
 }
 
+/* spinner */
+
 .spinner{
 border:3px solid rgba(255,255,255,.3);
 border-top:3px solid white;
@@ -127,7 +130,20 @@ font-size:13px;
 color:#555;
 }
 
-/* video */
+/* VIDEO SIDE */
+
+.video-section{
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+.video-title{
+font-size:20px;
+font-weight:bold;
+color:#444;
+margin-bottom:10px;
+}
 
 .video-wrapper iframe{
 width:560px;
@@ -165,8 +181,16 @@ Start Process
 
 </div>
 
+<div class="video-section">
+
+<div class="video-title">
+How To Use
+</div>
+
 <div class="video-wrapper">
 <iframe src="https://www.youtube.com/embed/k9SfgtkEmpo" allowfullscreen></iframe>
+</div>
+
 </div>
 
 </div>
@@ -241,8 +265,6 @@ requestAnimationFrame(draw)
 }
 
 draw()
-
-/* button logic */
 
 async function release(){
 
