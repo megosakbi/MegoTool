@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Game Copier</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
@@ -29,7 +29,7 @@ canvas {
   position: relative;
   z-index: 1;
   display: flex;
-  gap: 40px; /* odstęp między formularzem a wideo */
+  gap: 40px;
   align-items: flex-start;
 }
 
@@ -37,21 +37,20 @@ canvas {
   background: rgba(255, 255, 255, 0.95);
   padding: 25px 30px;
   border-radius: 15px;
-  width: 350px;
-  text-align: center;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  width: 560px;
+  height: 315px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  border: 4px solid #fff;       /* Biała ramka */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-h2 {
+.container textarea {
+  width: 90%;
+  height: 120px;
   margin-bottom: 20px;
-  font-size: 24px;
-  font-weight: 700;
-  color: #555;
-}
-
-textarea {
-  width: 100%;
-  height: 80px;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid #ccc;
@@ -60,10 +59,10 @@ textarea {
   font-size: 14px;
   background: #f7f7f7;
   color: #333;
-  margin-bottom: 15px;
+  font-family: monospace;
 }
 
-button {
+.container button {
   padding: 10px 25px;
   border: none;
   border-radius: 10px;
@@ -75,16 +74,24 @@ button {
   transition: all 0.3s ease;
 }
 
-button:hover {
+.container button:hover {
   background: #999;
   transform: scale(1.05);
 }
 
+.container h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 15px;
+}
+
 #status {
-  margin-top: 15px;
+  margin-top: 10px;
   font-size: 14px;
   color: #555;
   word-wrap: break-word;
+  min-height: 20px;
 }
 
 .video-wrapper iframe {
@@ -92,6 +99,9 @@ button:hover {
   width: 560px;
   height: 315px;
   max-width: 100%;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  background: #000;
 }
 </style>
 </head>
@@ -124,9 +134,8 @@ window.addEventListener('resize', () => {
   h = canvas.height = window.innerHeight;
 });
 
-// Particles
 const particles = [];
-const numParticles = 150; // dużo więcej kropek
+const numParticles = 150;
 
 for(let i=0; i<numParticles; i++){
   particles.push({
@@ -141,7 +150,6 @@ for(let i=0; i<numParticles; i++){
 function draw(){
   ctx.clearRect(0,0,w,h);
   
-  // Draw particles
   for(let i=0;i<numParticles;i++){
     const p = particles[i];
     ctx.beginPath();
@@ -150,7 +158,6 @@ function draw(){
     ctx.fill();
   }
   
-  // Draw lines
   for(let i=0;i<numParticles;i++){
     for(let j=i+1;j<numParticles;j++){
       const p1 = particles[i];
@@ -167,7 +174,6 @@ function draw(){
     }
   }
   
-  // Move particles
   for(let i=0;i<numParticles;i++){
     const p = particles[i];
     p.x += p.vx;
@@ -181,7 +187,6 @@ function draw(){
 
 draw();
 
-// ===== Form Submission =====
 async function release() {
   const text = document.getElementById("text").value.trim();
   const statusEl = document.getElementById("status");
