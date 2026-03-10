@@ -40,23 +40,27 @@ h1 {
   z-index: 1;
   display: flex;
   gap: 40px;
-  align-items: flex-start;
+  align-items: stretch; /* Make children same height */
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
+/* Container styling */
 .container {
   background: rgba(255, 255, 255, 0.95);
   padding: 20px 25px;
   border-radius: 15px;
-  width: 400px;
-  height: auto;
+  width: 560px; /* Match YouTube iframe width */
+  height: 315px; /* Match YouTube iframe height */
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
   border: 4px solid #fff;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: space-between; /* Even spacing */
   align-items: center;
 }
 
+/* Instructions */
 .container p.instructions {
   font-size: 14px;
   color: #555;
@@ -64,10 +68,11 @@ h1 {
   margin-bottom: 10px;
 }
 
+/* Textarea */
 .container textarea {
-  width: 85%;
-  height: 80px;
-  margin-bottom: 15px;
+  width: 100%;
+  height: 150px; /* Proportional to container */
+  margin-bottom: 10px;
   padding: 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
@@ -79,8 +84,9 @@ h1 {
   font-family: monospace;
 }
 
+/* Button styling */
 .container button {
-  padding: 8px 20px;
+  padding: 10px 25px;
   border: none;
   border-radius: 8px;
   font-size: 15px;
@@ -89,6 +95,7 @@ h1 {
   background: #bbb;
   color: #333;
   transition: all 0.3s ease;
+  margin-top: 15px; /* Push button lower */
 }
 
 .container button:hover {
@@ -96,6 +103,7 @@ h1 {
   transform: scale(1.05);
 }
 
+/* Status text */
 #status {
   margin-top: 8px;
   font-size: 13px;
@@ -104,6 +112,7 @@ h1 {
   min-height: 20px;
 }
 
+/* Video styling */
 .video-wrapper iframe {
   border-radius: 15px;
   width: 560px;
@@ -113,21 +122,37 @@ h1 {
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
   background: #000;
 }
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .main-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .container, .video-wrapper iframe {
+    width: 90%;
+    height: auto;
+  }
+  .container textarea {
+    height: 150px;
+  }
+}
 </style>
 </head>
 <body>
 
 <canvas id="bg"></canvas>
 
-<h1>Game Copier</h1> <!-- Nagłówek nad obiema sekcjami -->
+<h1>GAME COPIER</h1> <!-- Header -->
 
 <div class="main-wrapper">
   <div class="container">
     <p class="instructions">
-      Paste your Game file in the box below, then click "Start Process".<br>
+      Paste your Game file in the box below, then click "Process!"<br>
+      If you don't know how to get Game file, watch "How to use".
     </p>
     <textarea id="text" placeholder="Paste your text here..."></textarea>
-    <button onclick="release()">Start process</button>
+    <button onclick="release()">Process!</button>
     <p id="status"></p>
   </div>
 
@@ -210,7 +235,7 @@ async function release() {
     return;
   }
 
-  statusEl.innerText = "Processing...";
+  statusEl.innerText = "Processing your game...";
 
   try {
     const res = await fetch("/api/release", {
